@@ -7,40 +7,25 @@ class Calculator
   end
 
   def gpa
-    total = 0
-    @grades.each do |grade|
-      total += grades_equivalent[grade]
-      # case grade
-      # when 'A' then total += 4
-      # when 'A-' then total += 3.7
-      # when 'B+' then total += 3.3
-      # when 'B' then total += 3
-      # when 'B-' then total += 2.7
-      # when 'C+' then total += 2.3
-      # when 'C' then total += 2
-      # when 'C-' then total += 1.7
-      # when 'D+' then total += 1.3
-      # when 'D' then total += 1
-      # when 'D-' then total += 0.7
-      # when 'E+' then total += 0.5
-      # when 'E' then total += 0.2
-      # when 'E-' then total += 0.1
-      # when 'F' then total += 0
-      # when 'U' then total -= 1
-      #   # check if else condition needs to be put in place
-      # end
-    end
-    (total / @grades.count).round(1)
+    total = 0 # Use inject
+    total += @grades.each { |grade| grades_conversion(grade) } # Try using collect
+    (total / @grades.count).round(1) # Average
   end
 
+  # Add error handling
+
   def announcement
-    "#{name} scored an average of #{gpa.to_f}"
+    "#{@name} scored an average of #{gpa.to_f}"
   end
 
   private
 
-  def grades_equivalent
-    {
+  # I`ve decided to make this new method, because it can be reausable in the future.
+  # At the moment the method can stay as private as it is only called inside the class Calculator
+  # I thought about 3 different options here, if statements, case when statements and a hash with key and values
+  # I've opted for ***** because ...
+  def grades_conversion(grade)
+    grades_array = {
       'A' => 4, 'A-' => 3.7,
       'B+' => 3.3, 'B' => 3, 'B-' => 2.7,
       'C+' => 2.3, 'C' => 2, 'C-' => 1.7,
@@ -49,6 +34,8 @@ class Calculator
       'F' => 0,
       'U' => -1
     }
+
+    grades_array[grade]
   end
 end
 
