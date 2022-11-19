@@ -7,25 +7,41 @@ class Calculator
   end
 
   def gpa
-    total = 0 # Use inject
-    total += @grades.each { |grade| grades_conversion(grade) } # Try using collect
-    (total / @grades.count).round(1) # Average
+    if grades_check
+      grades_array = collect_converted_grades
+      average_grade = average_the_array(grades_array)
+      average_grade.round(1)
+    else
+      false
+    end
   end
 
-  # Add error handling
-
   def announcement
-    "#{@name} scored an average of #{gpa.to_f}"
+    if gpa
+      "#{@name} scored an average of #{gpa.to_f}"
+    else
+      "Something went wrong with #{@name} Grades, please check if you typed the grades Correctly"
+    end
   end
 
   private
 
-  # I`ve decided to make this new method, because it can be reausable in the future.
-  # At the moment the method can stay as private as it is only called inside the class Calculator
-  # I thought about 3 different options here, if statements, case when statements and a hash with key and values
-  # I've opted for ***** because ...
+  # I`ve decided to make these new methods, because they can be reused in the future.
+  # At the moment the methods can stay as private as they are only called inside the class Calculator
+
+  # Methodo to check if the grades are valid
+  def grades_check
+    return unless @grades.instance_of?(Array)
+
+    grades_array = collect_converted_grades
+    grades_array.size.positive? && grades_array.none?(nil)
+  end
+
+  # For grades_conversion I thought about 3 different options here, if statements, case when statements and a hash with key and values
+  # I've opted for Hash because It can work as a Database.
+  # grades_conversion also can be re in the future if you need to convert a grade for any other reason.
   def grades_conversion(grade)
-    grades_array = {
+    grades_hash = {
       'A' => 4, 'A-' => 3.7,
       'B+' => 3.3, 'B' => 3, 'B-' => 2.7,
       'C+' => 2.3, 'C' => 2, 'C-' => 1.7,
@@ -34,10 +50,52 @@ class Calculator
       'F' => 0,
       'U' => -1
     }
+    grades_hash[grade]
+  end
 
-    grades_array[grade]
+  # I used collect to get an array of converted grades. Again it is reausable
+  def collect_converted_grades
+    @grades.collect { |grade| grades_conversion(grade) }
+  end
+
+  # Ruby doesn`t have a method to average and array of integers so we had to create our won
+  # I used collect to get an array of converted grades. Again it is reausable
+  def average_the_array(grades_array)
+    grades_array.sum(0.0) / grades_array.size
   end
 end
+
+# I have added my tests for how_might_you_do_these, I`ve done a general Error handling,
+# But we can deal with each individual possible erro giving a better Feedback to the User, that would require a bit more time to develop.
+
+how_might_you_do_these = [
+  { in: { name: 'Non-grades', grades: ["N"]}, out: { gpa: false, announcement: "Something went wrong with Non-grades Grades, please check if you typed the grades Correctly"  } },
+  { in: { name: 'Non-strings', grades: ["A", :B] },  out: { gpa: false, announcement: "Something went wrong with Non-strings Grades, please check if you typed the grades Correctly"  } },
+  { in: { name: 'Empty', grades: [] }, out: { gpa: false, announcement: "Something went wrong with Empty Grades, please check if you typed the grades Correctly"  } },
+  { in: { name: 'Numbers', grades: [1, 2] }, out: { gpa: false, announcement: "Something went wrong with Numbers Grades, please check if you typed the grades Correctly"  } },
+  { in: { name: 'Passed a string', grades: "A A-" }, out: { gpa: false, announcement: "Something went wrong with Passed a string Grades, please check if you typed the grades Correctly"  } },
+]
+
+how_might_you_do_these.each do |test|
+  user = Calculator.new(test[:in][:name], test[:in][:grades])
+
+  puts "#{'-' * 10} #{user.name} #{'-' * 10}"
+
+  [:gpa, :announcement].each do |method|
+    result = user.public_send(method)
+    expected = test[:out][method]
+
+    if result == expected
+      puts "✅ #{method.to_s.upcase}: #{result}"
+    else
+      puts "❌ #{method.to_s.upcase}: expected '#{expected}' but got '#{result}'"
+    end
+  end
+
+  puts
+end
+
+# For CoverageBook's tests I had to change the names of Emma, Frida and Gary on the announcement because they had Beryl instead,
 
 ## Do not edit below here ##################################################
 
